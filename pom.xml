@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.javanger.docker</groupId>
+    <artifactId>TodoApp</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>1.5.7.RELEASE</version>
+        <relativePath/>
+    </parent>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>1.8</java.version>
+
+        <dockermavenplugin.version>0.23.0</dockermavenplugin.version>
+
+        <!-- Properties for mysql database docker container -->
+        <docker.image.mysql>mysql:5.5</docker.image.mysql>
+        <docker.image.mysql.database>todo</docker.image.mysql.database>
+        <docker.image.mysql.root.password>root</docker.image.mysql.root.password>
+        <docker.image.mysql.user>admin</docker.image.mysql.user>
+        <docker.image.mysql.password>admin</docker.image.mysql.password>
+        <docker.image.mysql.portmapping>3306:3306</docker.image.mysql.portmapping>
+
+        <!-- Properties for mongodb database docker container -->
+        <docker.image.mongo>mongo</docker.image.mongo>
+        <docker.image.mongo.user>root</docker.image.mongo.user>
+        <docker.image.mongo.password>root</docker.image.mongo.password>
+        <docker.image.mongo.portmapping>27017:27017</docker.image.mongo.portmapping>
+
+        <!-- Properties for redis docker container -->
+        <docker.image.redis>redis</docker.image.redis>
+        <docker.image.redis.portmapping>6379:6379</docker.image.redis.portmapping>
+
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jetty</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.40</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.16.20</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+    <profiles>
+        <profile>
+            <id>docker</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.fabric8</groupId>
+                        <artifactId>docker-maven-plugin</artifactId>
+                        <version>${dockermavenplugin.version}</version>
+
+                        <configuration>
+                            <verbose>true</verbose>
+                            <images>
+                                <image>
+                                    <name>${docker.image.mysql}</name>
+                                    <alias>local-mysql-database</alias>
+                                    <run>
+                                        <env>
+                                            <MYSQL_ROOT_PASSWORD>${docker.image.mysql.root.password}</MYSQL_ROOT_PASSWORD>
+                                            <MYSQL_DATABASE>${docker.image.mysql.database}</MYSQL_DATABASE>
+                                            <MYSQL_USER>${docker.image.mysql.user}</MYSQL_USER>
+                                            <MYSQL_PASSWORD>${docker.image.mysql.password}</MYSQL_PASSWORD>
+                                        </env>
+                                        <ports>
+                                            <port>${docker.image.mysql.portmapping}</port>
+                                        </ports>
+                                    </run>
+                                </image>
+
+                                <image>
+                                    <name>${docker.image.mongo}</name>
+                                    <alias>local-mongo-database</alias>
+                                    <run>
+                                        <env>
+                                            <MONGO_INITDB_ROOT_USERNAME>${docker.image.mongo.user}</MONGO_INITDB_ROOT_USERNAME>
+                                            <MONGO_INITDB_ROOT_PASSWORD>${docker.image.mongo.password}</MONGO_INITDB_ROOT_PASSWORD>
+                                        </env>
+                                        <ports>
+                                            <port>${docker.image.mongo.portmapping}</port>
+                                        </ports>
+                                    </run>
+                                </image>
+
+                                <image>
+                                    <name>${docker.image.redis}</name>
+                                    <alias>local-redis-cache</alias>
+                                    <run>
+                                        <ports>
+                                            <port>${docker.image.redis.portmapping}</port>
+                                        </ports>
+                                    </run>
+                                </image>
+
+                            </images>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>container-start</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                    <goal>start</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>container-stop</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+    </profiles>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unit-test</id>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <phase>test</phase>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/*IT.java</exclude>
+                            </excludes>
+                            <includes>
+                                <include>**/*Test.java</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>integration-test</id>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <phase>integration-test</phase>
+                        <configuration>
+                            <excludes>
+                                <exclude>none</exclude>
+                            </excludes>
+                            <includes>
+                                <include>**/*IT.java</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+
+</project>
