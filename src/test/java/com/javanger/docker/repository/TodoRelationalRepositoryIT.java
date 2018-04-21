@@ -16,7 +16,7 @@ import static org.hamcrest.CoreMatchers.is;
 @RunWith(SpringRunner.class)
 @Transactional
 @SpringBootTest
-public class RelationalDatabaseIT {
+public class TodoRelationalRepositoryIT {
 
     @Autowired
     private TodoRelationalRepository repository;

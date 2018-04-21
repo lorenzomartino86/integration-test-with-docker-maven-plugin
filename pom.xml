@@ -32,12 +32,11 @@
 
         <!-- Properties for mongodb database docker container -->
         <docker.image.mongo>mongo</docker.image.mongo>
-        <docker.image.mongo.user>root</docker.image.mongo.user>
-        <docker.image.mongo.password>root</docker.image.mongo.password>
+        <docker.image.mongo.database>todo</docker.image.mongo.database>
         <docker.image.mongo.portmapping>27017:27017</docker.image.mongo.portmapping>
 
         <!-- Properties for redis docker container -->
-        <docker.image.redis>redis</docker.image.redis>
+        <docker.image.redis>redis:3.2</docker.image.redis>
         <docker.image.redis.portmapping>6379:6379</docker.image.redis.portmapping>
 
     </properties>
@@ -63,6 +62,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb</artifactId>
         </dependency>
 
         <dependency>
@@ -123,8 +127,7 @@
                                     <alias>local-mongo-database</alias>
                                     <run>
                                         <env>
-                                            <MONGO_INITDB_ROOT_USERNAME>${docker.image.mongo.user}</MONGO_INITDB_ROOT_USERNAME>
-                                            <MONGO_INITDB_ROOT_PASSWORD>${docker.image.mongo.password}</MONGO_INITDB_ROOT_PASSWORD>
+                                            <MONGODB_DBNAME>${docker.image.mongo.database}</MONGODB_DBNAME>
                                         </env>
                                         <ports>
                                             <port>${docker.image.mongo.portmapping}</port>
