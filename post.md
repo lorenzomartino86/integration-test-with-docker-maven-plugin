@@ -5,29 +5,27 @@ Main challenge is the configuration of this kind of tests that can be tricky bec
 
 In this post I describe all operations needed to set up integration tests running against external services (databases, caching systems, etc.) served by Docker container.
 
-## Context Description
-In most contexts you need to test a real connection to a relational database and you simply can't wrap it with an embedded one (like H2). In that case you need to run your local database service manually.
+**Context Overview: ** When you need to test a real integration with an external service. For example a connection to a relational database and you simply can't wrap it with an embedded one (like H2). 
+In that case you need to run your local database service manually. The main problem with this approach is that running a local service manually can be error-prone and not reliable if you need a stateless service (i.e. a database should be destroyed and restarted at each test run).
 
-## Main Problem
-Running a local service manually can be error prone and not reliable if you need a stateless dependendy.
-
-## A possible solution is Automation
-You can integrate docker in your build process to run external services automatically. In the following proof of concept I detail how to integrate docker with your Spring Boot application with Fabric8 Docker Maven Plugin.
+## A solution is given by Automation
+You can integrate docker in your build process to run external services automatically and speed up destroy and rebuild/restart process. 
+In the following proof of concept I show all steps followed in order to integrate docker with a Spring Boot application with Fabric8 Docker Maven Plugin.
 
 ## Proof of concept
-First clone [this repository](https://github.com/lorenzomartino86/integration-test-with-docker-maven-plugin) from github:
+To follow next steps is suggest to clone [this repository](https://github.com/lorenzomartino86/integration-test-with-docker-maven-plugin) from github:
 
 ```
    git clone git@github.com:lorenzomartino86/integration-test-with-docker-maven-plugin.git
 ```
 
-Checking pom.xml I've added version *0.23.0* of maven plugin
+First of all, I've added version [0.23.0](http://repo1.maven.org/maven2/io/fabric8/docker-maven-plugin/0.23.0/) of docker maven plugin
 
 ```xml
    <dockermavenplugin.version>0.23.0</dockermavenplugin.version>
 ```
 
-Then let's create a new Maven profile named *docker* to handle Fabric8 plugin in order to stop & start Docker containers in the *pre-integration-test* phase and finally stop them in the *post-integration-test* phase:
+and I've created a new Maven profile named *docker* to handle Fabric8 plugin in order to stop & start Docker containers in the *pre-integration-test* phase and finally stop them in the *post-integration-test* phase:
 
 ```xml
    <profiles>
@@ -66,7 +64,7 @@ Then let's create a new Maven profile named *docker* to handle Fabric8 plugin in
    </profiles>
 ```
 
-Now we can add our *mysql* image in order to pull from public registry. We define database *todo* and username *admin* with the portmapping *3306:3306* in order to serve from container to host: 
+Then I've added the *mysql* image in order to pull from public registry. I've then defined database *todo* and username *admin* with the portmapping *3306:3306* in order to serve from container to host: 
 
 ```xml
    <!-- Properties for mysql database docker container -->
@@ -79,7 +77,7 @@ Now we can add our *mysql* image in order to pull from public registry. We defin
 
 ```
 
-Then we can configure the image directly in the plugin section: 
+Then I've configured the image parameters directly in the plugin configuration section with all required environment variables (database name, username, password, root password): 
 
 ```xml
   <configuration>
@@ -106,7 +104,7 @@ Then we can configure the image directly in the plugin section:
 
 ```
 
-Now we can add a simple Todo entity:
+Then only for testing purpose I've created an Entity class called *TodoRelational* to handle a relational table:
 
 ```java
 @Data
@@ -123,7 +121,7 @@ public class TodoRelational {
 
 ```
 
-and a JPA repository:
+and created a JPA repository for CRUD operations:
 
 ```java
 @Repository
@@ -131,7 +129,7 @@ public interface TodoRelationalRepository extends JpaRepository<TodoRelational, 
 }
 ```
 
-Now we can finally write our integration test class:
+I've finally added the integration test class with *@SpringBootTest*:
 
 ```java
 
@@ -199,7 +197,7 @@ public class TodoRelationalRepositoryIT {
 
 ```
 
-We need following properties in *application.properties* file in order to connect to docker container:
+In order to connect to mysql served by docker container I've added following properties in *application.properties* file:
 
 ```
 
@@ -207,7 +205,6 @@ We need following properties in *application.properties* file in order to connec
 spring.jpa.database=MYSQL
 spring.jpa.hibernate.ddl-auto=create-drop
 spring.jpa.show-sql=true
-
 spring.datasource.url=jdbc:mysql://127.0.0.1:3306/todo?autoReconnect=true
 spring.datasource.username=admin
 spring.datasource.password=admin
@@ -218,14 +215,14 @@ spring.datasource.validationQuery = SELECT 1
 
 ```
 
-Now we can execute our maven build with integration test and activate *Docker* profile
+Finally I've executed a maven build activating *Docker* profile through following command:
 
 ```sh
 mvn clean verify -Pdocker
 
 ```
 
-You should be able to see following results. As you can see the plugin start a new docker container from mysql image before integration test and stop it at the end:
+I was able to see test results and that plugin correctly started a new docker container from the right mysql image before integration test and stopped it at the end of tests:
 
 ```
 
@@ -255,6 +252,13 @@ Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
 [INFO] Final Memory: 43M/503M
 [INFO] ------------------------------------------------------------------------
 ```
+
+The cool stuff is that it's not the end, because you can add multiple images to run other containers if your project is integrated with other services. 
+In github repository I've added integration with Redis and MongoDB as well. If you run maven build you can check that three containers are created for integration tests and finally destroyed.
+
+I'll provide new sample integration in the repository and update this post in future.
+
+Stay with me! =)
 
 ### References
 
