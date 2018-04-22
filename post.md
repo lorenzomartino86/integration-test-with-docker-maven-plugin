@@ -15,19 +15,19 @@ Running a local service manually can be error prone and not reliable if you need
 You can integrate docker in your build process to run external services automatically. In the following proof of concept I detail how to integrate docker with your Spring Boot application with Fabric8 Docker Maven Plugin.
 
 ## Proof of concept
-First of all clone the project repository from github:
+First clone [this repository](https://github.com/lorenzomartino86/integration-test-with-docker-maven-plugin) from github:
 
 ```
    git clone git@github.com:lorenzomartino86/integration-test-with-docker-maven-plugin.git
 ```
 
-Checking pom.xml I've added following version of Fabric docker maven plugin
+Checking pom.xml I've added version *0.23.0* of maven plugin
 
 ```xml
    <dockermavenplugin.version>0.23.0</dockermavenplugin.version>
 ```
 
-Then let's create a new Maven profile named *docker* to handle Fabric8 plugin in order to stop&start Docker containers in the *pre-integration-test* phase and finally stop them in the *post-integration-test* phase:
+Then let's create a new Maven profile named *docker* to handle Fabric8 plugin in order to stop & start Docker containers in the *pre-integration-test* phase and finally stop them in the *post-integration-test* phase:
 
 ```xml
    <profiles>
@@ -255,3 +255,8 @@ Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
 [INFO] Final Memory: 43M/503M
 [INFO] ------------------------------------------------------------------------
 ```
+
+### References
+
+- [Docker maven plugin repository](https://github.com/fabric8io/docker-maven-plugin)
+- [Docker maven plugin user manual](http://dmp.fabric8.io/)

@@ -14,5 +14,5 @@ This profile will activate Fabric8 plugin that will pull and run in containers f
 
 Then build will trigger integration tests against these running containers.
 
-Finally at the end of integration-phase running containers are automatically stopped.
+Finally at the end of integration-phase running containers are automatically stopped. For more details please see [this post](https://javanger.blogspot.ie/2018/04/speed-up-your-spring-boot-integration.html)
 
