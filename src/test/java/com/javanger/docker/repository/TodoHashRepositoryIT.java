@@ -1,6 +1,5 @@
 package com.javanger.docker.repository;
 
-import org.aspectj.weaver.Iterators;
 import org.assertj.core.util.Lists;
 import org.junit.After;
 import org.junit.Test;
@@ -11,7 +10,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertNotNull;
