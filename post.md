@@ -5,14 +5,15 @@ Main challenge is the configuration of this kind of tests that can be tricky bec
 
 In this post I describe all operations needed to set up integration tests running against external services (databases, caching systems, etc.) served by Docker container.
 
-**Context Overview: ** When you need to test a real integration with an external service. For example a connection to a relational database and you simply can't wrap it with an embedded one (like H2). 
+## Context Overview 
+When you need to test a real integration with an external service. For example a connection to a relational database and you simply can't wrap it with an embedded one (like H2). 
 In that case you need to run your local database service manually. The main problem with this approach is that running a local service manually can be error-prone and not reliable if you need a stateless service (i.e. a database should be destroyed and restarted at each test run).
 
 ## A solution is given by Automation
 You can integrate docker in your build process to run external services automatically and speed up destroy and rebuild/restart process. 
 In the following proof of concept I show all steps followed in order to integrate docker with a Spring Boot application with Fabric8 Docker Maven Plugin.
 
-## Proof of concept
+### Proof of concept
 To follow next steps is suggest to clone [this repository](https://github.com/lorenzomartino86/integration-test-with-docker-maven-plugin) from github:
 
 ```
@@ -253,6 +254,7 @@ Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
 [INFO] ------------------------------------------------------------------------
 ```
 
+### Extension
 The cool stuff is that it's not the end, because you can add multiple images to run other containers if your project is integrated with other services. 
 In github repository I've added integration with Redis and MongoDB as well. If you run maven build you can check that three containers are created for integration tests and finally destroyed.
 
